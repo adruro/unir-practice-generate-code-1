@@ -1,0 +1,8 @@
+taskflow.exe
+taskflow
+taskflow-mac
+*.db
+.git
+.vscode
+.idea
+docs/

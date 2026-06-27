@@ -1,0 +1,15 @@
+services:
+  taskflow:
+    build: .
+    container_name: taskflow
+    ports:
+      - "3000:8080"
+    volumes:
+      - taskflow-data:/app/data
+    environment:
+      - TASKFLOW_PORT=8080
+      - TASKFLOW_DB=/app/data/taskflow.db
+    restart: unless-stopped
+
+volumes:
+  taskflow-data:

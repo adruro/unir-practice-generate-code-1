@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TaskFlow — Dashboard</title>
+    <link rel="stylesheet" href="/static/css/dashboard.css">
+</head>
+<body>
+    <!-- Sidebar -->
+    <aside class="sidebar" id="sidebar">
+        <div class="sidebar-brand">
+            <div class="brand-icon">✓</div>
+            <span class="brand-name">TaskFlow</span>
+        </div>
+
+        <nav class="sidebar-nav">
+            <div class="nav-section">
+                <span class="nav-section-title">Panel</span>
+                <a href="#" class="nav-item active" data-filter="status" data-value="all">
+                    <span class="nav-icon">📊</span>
+                    <span>Todas las tareas</span>
+                    <span class="nav-badge" id="badge-all">0</span>
+                </a>
+                <a href="#" class="nav-item" data-filter="status" data-value="pending">
+                    <span class="nav-icon">⏳</span>
+                    <span>Pendientes</span>
+                    <span class="nav-badge" id="badge-pending">0</span>
+                </a>
+                <a href="#" class="nav-item" data-filter="status" data-value="completed">
+                    <span class="nav-icon">✅</span>
+                    <span>Completadas</span>
+                    <span class="nav-badge" id="badge-completed">0</span>
+                </a>
+            </div>
+
+            <div class="nav-section">
+                <span class="nav-section-title">Categorías</span>
+                <a href="#" class="nav-item" data-filter="category" data-value="trabajo">
+                    <span class="nav-icon">💼</span>
+                    <span>Trabajo</span>
+                </a>
+                <a href="#" class="nav-item" data-filter="category" data-value="personal">
+                    <span class="nav-icon">🏠</span>
+                    <span>Personal</span>
+                </a>
+                <a href="#" class="nav-item" data-filter="category" data-value="estudio">
+                    <span class="nav-icon">📚</span>
+                    <span>Estudio</span>
+                </a>
+            </div>
+
+            <div class="nav-section">
+                <span class="nav-section-title">Prioridad</span>
+                <a href="#" class="nav-item" data-filter="priority" data-value="alta">
+                    <span class="nav-icon">🔴</span>
+                    <span>Alta</span>
+                </a>
+                <a href="#" class="nav-item" data-filter="priority" data-value="media">
+                    <span class="nav-icon">🟡</span>
+                    <span>Media</span>
+                </a>
+                <a href="#" class="nav-item" data-filter="priority" data-value="baja">
+                    <span class="nav-icon">🟢</span>
+                    <span>Baja</span>
+                </a>
+            </div>
+        </nav>
+
+        <div class="sidebar-footer">
+            <a href="/logout" class="logout-btn">
+                <span>🚪</span>
+                <span>Cerrar Sesión</span>
+            </a>
+        </div>
+    </aside>
+
+    <!-- Main Content -->
+    <main class="main-content">
+        <!-- Top Bar -->
+        <header class="top-bar">
+            <button class="menu-toggle" onclick="toggleSidebar()">☰</button>
+            <div class="top-bar-left">
+                <h1 class="page-title">Mis Tareas</h1>
+                <p class="page-subtitle" id="filter-indicator">Mostrando todas las tareas</p>
+            </div>
+            <button class="add-task-btn" onclick="openModal()">
+                <span>+</span> Nueva Tarea
+            </button>
+        </header>
+
+        <!-- Stats Cards -->
+        <div class="stats-row">
+            <div class="stat-card stat-total">
+                <div class="stat-icon">📋</div>
+                <div class="stat-info">
+                    <span class="stat-number" id="stat-total">{{.Total}}</span>
+                    <span class="stat-label">Total</span>
+                </div>
+            </div>
+            <div class="stat-card stat-pending">
+                <div class="stat-icon">⏳</div>
+                <div class="stat-info">
+                    <span class="stat-number" id="stat-pending">{{.Pending}}</span>
+                    <span class="stat-label">Pendientes</span>
+                </div>
+            </div>
+            <div class="stat-card stat-done">
+                <div class="stat-icon">✅</div>
+                <div class="stat-info">
+                    <span class="stat-number" id="stat-done">{{.Completed}}</span>
+                    <span class="stat-label">Completadas</span>
+                </div>
+            </div>
+            <div class="stat-card stat-progress">
+                <div class="stat-icon">📈</div>
+                <div class="stat-info">
+                    <span class="stat-number" id="stat-progress">0%</span>
+                    <span class="stat-label">Progreso</span>
+                </div>
+                <div class="progress-bar">
+                    <div class="progress-fill" id="progress-fill"></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Task List -->
+        <div class="task-list-container">
+            <div class="task-list" id="task-list">
+                <!-- Tasks loaded via JS -->
+            </div>
+            <div class="empty-state" id="empty-state" style="display:none;">
+                <div class="empty-icon">📝</div>
+                <h3>No hay tareas aquí</h3>
+                <p>Crea tu primera tarea para empezar a organizar tu día</p>
+            </div>
+        </div>
+    </main>
+
+    <!-- Modal -->
+    <div class="modal-overlay" id="modal-overlay" onclick="closeModal(event)">
+        <div class="modal" id="task-modal">
+            <div class="modal-header">
+                <h2 id="modal-title">Nueva Tarea</h2>
+                <button class="modal-close" onclick="closeModal()">&times;</button>
+            </div>
+            <form id="task-form" onsubmit="handleTaskSubmit(event)">
+                <input type="hidden" id="task-id" value="">
+                <div class="modal-body">
+                    <div class="form-group">
+                        <label>Título</label>
+                        <input type="text" id="task-title" placeholder="¿Qué necesitas hacer?" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Descripción</label>
+                        <textarea id="task-description" placeholder="Añade detalles (opcional)" rows="3"></textarea>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>Categoría</label>
+                            <select id="task-category">
+                                <option value="personal">🏠 Personal</option>
+                                <option value="trabajo">💼 Trabajo</option>
+                                <option value="estudio">📚 Estudio</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label>Prioridad</label>
+                            <select id="task-priority">
+                                <option value="media">🟡 Media</option>
+                                <option value="alta">🔴 Alta</option>
+                                <option value="baja">🟢 Baja</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn-cancel" onclick="closeModal()">Cancelar</button>
+                    <button type="submit" class="btn-save">Guardar Tarea</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script src="/static/js/dashboard.js"></script>
+</body>
+</html>
